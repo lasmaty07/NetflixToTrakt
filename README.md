@@ -3,6 +3,7 @@
 Export cvs from netflix
 
 complete SECRETS.env
+
 '''
 TRATK_API_KEY=
 

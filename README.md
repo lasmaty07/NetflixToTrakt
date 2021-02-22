@@ -4,7 +4,7 @@ Export cvs from netflix
 
 complete SECRETS.env
 
-'''
+```
 TRATK_API_KEY=
 
 #CLIENT SECRET
@@ -14,6 +14,6 @@ TRATK_API_SECRET=
 FILE=change_me/NetflixViewingHistoryShort.csv
 
 TOKEN=
-'''
+```
 
 run 'SyncHistoryTracktv.log'

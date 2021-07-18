@@ -74,7 +74,7 @@ def search_movies():
       i = 0
       for movie in json_data:            
         if movie['movie']['title'] == movie_to_search:
-          i += i + 1 
+          i += 1 
           watched_at = datetime.datetime.strptime(_items[movie_to_search], '%m/%d/%y')
           # time un 2020-09-12T00:00:00.000Z 
           m = {"watched_at": watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
@@ -85,9 +85,9 @@ def search_movies():
             }
           }
           if i >1:
-            _duplicates['movies'].append(str(movie['movie']['title'] + ' ' + str(movie['movie']['year']) + ' Imdb id: '+ (movie['movie']['ids']['imdb'] if movie['movie']['ids']['imdb'] else 'null')))
+            _duplicates['movies'].append(movie['movie']['title'] + ' ' + str(movie['movie']['year']) + ' Imdb id: '+ (movie['movie']['ids']['imdb'] if movie['movie']['ids']['imdb'] else 'null') + ' https://trakt.tv/movies/'+ str(movie['movie']['ids']['trakt']))
       else:
-        if m !={}:
+        if m !={} and i==1:
           _movies_matched.append(m)
   if _movies_matched:          
     _final_request['movies'] = _movies_matched
@@ -108,7 +108,7 @@ def search_shows():
       i = 0
       for episode in json_data:            
         if episode['episode']['title'] == episode_name and episode['show']['title'] == show_title:
-          i += i + 1 
+          i += 1 
           watched_at = datetime.datetime.strptime(_items[show_to_search], '%m/%d/%y')
           # time un 2020-09-12T00:00:00.000Z 
           e = {
@@ -121,7 +121,7 @@ def search_shows():
           if i >1:
             _duplicates['movies'].append(show_to_search)
       else:
-        if e !={}:
+        if e !={} and i==1:
           _shows_matched.append(e)
   if _shows_matched:
     _final_request['episodes'] = _shows_matched
@@ -143,8 +143,11 @@ def main():
   print(_duplicates)
   print('\nFinal Request\n')
   print(_final_request)
+  
+  with open('duplicates.json', 'w') as f:
+    print(json.dumps(_duplicates), file=f)
 
-  # invoque   
+  # invoke   
   response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
   print(response)
 

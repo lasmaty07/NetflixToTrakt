@@ -33,7 +33,7 @@ _headers = {
 _final_request = {}
 _movies_matched = []
 _shows_matched = []
-_duplicates = {"movies": [], "episodes":[]}
+_duplicates = {"movies": {}, "episodes":{}}
 _baseurl = 'https://api.trakt.tv'
 csvFile=open(os.getenv("FILE"), newline='')
 
@@ -117,7 +117,12 @@ def addDuplicate(item_found,item_to_search,type,type2):
           "trakt":item_found[type]['ids']['trakt'],
           "URL": ' https://trakt.tv/movies/'+ str(item_found[type]['ids']['trakt'])
     }
-  _duplicates[type2].append(item)
+
+  if item_to_search in _duplicates[type2]:
+    _duplicates[type2][item_to_search].append(item)
+  else:
+    _duplicates[type2][item_to_search] = []
+    _duplicates[type2][item_to_search].append(item)
 
 def main():
   #load from csv
@@ -130,8 +135,6 @@ def main():
   print(_headers)
 
   print('Found ' + str(len(_items)) + ' items to import\n')
-  #search_movies()
-  #search_shows()
   search()
   print('\n--------------------Found duplicates--------------------\n')
   print(_duplicates)

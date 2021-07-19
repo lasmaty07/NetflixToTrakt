@@ -177,8 +177,8 @@ def main():
     print(json.dumps(_final_request), file=f)
 
   # invoke   
-  #response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
-  #print(response)
+  response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
+  print(response)
 
   print('\n------------Exiting Program------------\n')
   sys.exit(0)

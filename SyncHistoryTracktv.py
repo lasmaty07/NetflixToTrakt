@@ -30,9 +30,8 @@ _headers = {
   'Authorization'     : 'Bearer ' + os.getenv("TOKEN"),
 }
 
-_final_request = {}
-_movies_matched = []
-_shows_matched = []
+_final_request = {"movies":[],"episodes": []}
+_items_matched = []
 _duplicates = {"movies": {}, "episodes":{}}
 _baseurl = 'https://api.trakt.tv'
 csvFile=open(os.getenv("FILE"), newline='')
@@ -88,8 +87,9 @@ def search():
     if response:
       json_data = json.loads(response.text)
       i = 0
-      for item_found in json_data:            
-        if item_found[type]['title'] == title and (type == 'movie' or item_found['show']['title'] == show_title):
+      for item_found in json_data:
+
+        if item_found[type]['title'].lower() == title.lower() and (type == 'movie' or item_found['show']['title'] == show_title):
           i += 1 
           watched_at = datetime.datetime.strptime(_items[item_to_search], '%m/%d/%y')
           # time un 2020-09-12T00:00:00.000Z 
@@ -100,13 +100,12 @@ def search():
             "imdb": item_found[type]['ids']['imdb']
             }
           }
+
           if i >1:
             addDuplicate(item_found,item_to_search,type,type2)
       else:
         if m !={} and i==1:
-          _movies_matched.append(m)
-  if _movies_matched:          
-    _final_request[type2] = _movies_matched
+          _final_request[type2].append(m)
 
 def addDuplicate(item_found,item_to_search,type,type2):
   global _duplicates
@@ -136,8 +135,12 @@ def main():
 
   print('Found ' + str(len(_items)) + ' items to import\n')
   search()
-  print('\n--------------------Found duplicates--------------------\n')
-  print(_duplicates)
+  if _duplicates['movies'].len()>0:
+    print('\n------------Found duplicate movies------------\n')
+
+  if _duplicates['episodes'].len()>0:
+    print('\n------------Found duplicate episodes------------\n')    
+
   print('\n--------------------Final Request--------------------\n')
   print(json.dumps(_final_request))
   
@@ -148,6 +151,7 @@ def main():
   #response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
   #print(response)
 
+  print('\n------------Exiting Program------------\n')
   sys.exit(0)
 
 if __name__ == '__main__':

@@ -31,7 +31,6 @@ _headers = {
 }
 
 _final_request = {"movies":[],"episodes": []}
-_items_matched = []
 _duplicates = {"movies": {}, "episodes":{}}
 _baseurl = 'https://api.trakt.tv'
 csvFile=open(os.getenv("FILE"), newline='')
@@ -87,10 +86,11 @@ def search():
     if response:
       json_data = json.loads(response.text)
       i = 0
+      item_found_prev = {type:{}}
       for item_found in json_data:
 
         if item_found[type]['title'].lower() == title.lower() and (type == 'movie' or item_found['show']['title'] == show_title):
-          i += 1 
+          
           watched_at = datetime.datetime.strptime(_items[item_to_search], '%m/%d/%y')
           # time un 2020-09-12T00:00:00.000Z 
           m = {"watched_at": watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
@@ -101,8 +101,11 @@ def search():
             }
           }
 
-          if i >1:
+          if i!=0 and item_found[type]['title'].lower() == item_found_prev[type]['title'].lower():
             addDuplicate(item_found,item_to_search,type,type2)
+
+          item_found_prev = item_found
+          i = i + 1 
       else:
         if m !={} and i==1:
           _final_request[type2].append(m)
@@ -135,11 +138,11 @@ def main():
 
   print('Found ' + str(len(_items)) + ' items to import\n')
   search()
-  if _duplicates['movies'].len()>0:
-    print('\n------------Found duplicate movies------------\n')
+  if len(_duplicates['movies'])>0:
+    print('\nFound duplicate movies check duplicates.json\n')
 
-  if _duplicates['episodes'].len()>0:
-    print('\n------------Found duplicate episodes------------\n')    
+  if len(_duplicates['episodes'])>0:
+    print('\nFound duplicate episodes check duplicates.json\n')    
 
   print('\n--------------------Final Request--------------------\n')
   print(json.dumps(_final_request))
@@ -148,8 +151,8 @@ def main():
     print(json.dumps(_duplicates), file=f)
 
   # invoke   
-  #response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
-  #print(response)
+  response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
+  print(response)
 
   print('\n------------Exiting Program------------\n')
   sys.exit(0)

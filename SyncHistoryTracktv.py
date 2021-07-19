@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import os,sys
+import os,sys,json
 
 try:
   from pathlib import Path
@@ -102,7 +102,7 @@ def search():
           }
 
           if i!=0 and item_found[type]['title'].lower() == item_found_prev[type]['title'].lower():
-            addDuplicate(item_found,item_to_search,type,type2)
+            addDuplicate(item_found,item_to_search,type,type2,watched_at)
 
           item_found_prev = item_found
           i = i + 1 
@@ -110,14 +110,16 @@ def search():
         if m !={} and i==1:
           _final_request[type2].append(m)
 
-def addDuplicate(item_found,item_to_search,type,type2):
+def addDuplicate(item_found,item_to_search,type,type2,watched_at):
   global _duplicates
 
   item = {"title":item_found[type]['title'],
           "year" : str(item_found[type]['year']),
           "Imdb_id": (item_found[type]['ids']['imdb'] if item_found[type]['ids']['imdb'] else 'null'),
           "trakt":item_found[type]['ids']['trakt'],
-          "URL": ' https://trakt.tv/movies/'+ str(item_found[type]['ids']['trakt'])
+          "URL": ' https://trakt.tv/movies/'+ str(item_found[type]['ids']['trakt']),
+          "watched_at":watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+          "validated":"False"
     }
 
   if item_to_search in _duplicates[type2]:
@@ -125,6 +127,26 @@ def addDuplicate(item_found,item_to_search,type,type2):
   else:
     _duplicates[type2][item_to_search] = []
     _duplicates[type2][item_to_search].append(item)
+
+def importValidatedDuplicates():
+  file = 'duplicates.json'
+  try:
+    f = open(file,)
+    data = json.load(f)
+    print(data)
+    for movie in data['movies']:
+      for item_found in data['movies'][movie]:
+        if item_found['validated'] == 'True':
+            m = {"watched_at": item_found['watched_at'],
+            "title": item_found['title'],
+            "ids": {
+              "trakt": item_found['trakt'],
+              "imdb": item_found['Imdb_id']
+              }
+            }
+            _final_request['movies'].append(m)
+  except Exception as e:
+    print(f'no file {file}. ',e)
 
 def main():
   #load from csv
@@ -144,15 +166,19 @@ def main():
   if len(_duplicates['episodes'])>0:
     print('\nFound duplicate episodes check duplicates.json\n')    
 
+  importValidatedDuplicates()
   print('\n--------------------Final Request--------------------\n')
   print(json.dumps(_final_request))
   
   with open('duplicates.json', 'w') as f:
     print(json.dumps(_duplicates), file=f)
 
+  with open('final.json', 'w') as f:
+    print(json.dumps(_final_request), file=f)
+
   # invoke   
-  response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
-  print(response)
+  #response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
+  #print(response)
 
   print('\n------------Exiting Program------------\n')
   sys.exit(0)

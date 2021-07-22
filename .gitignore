@@ -1,5 +1,4 @@
 SECRETS.env
-ExpenseTracker.log
-SyncHistoryTracktv.log
-duplicates.json
-final.json
+*.log
+*.json
+__pycache__/*

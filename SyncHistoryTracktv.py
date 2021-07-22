@@ -35,31 +35,39 @@ _duplicates = {"movies": {}, "episodes":{}}
 _baseurl = 'https://api.trakt.tv'
 csvFile=open(os.getenv("FILE"), newline='')
 
-def read_csv(file):
-        reader = csv.reader(file, delimiter=',')
-        return dict(reader)
+class NetflixItems():
+  def __init__(self):
+    self.duplicates = {"movies": {}, "episodes":{}}
+
+  def read_csv(self,fileName):
+    try:
+      reader = csv.reader(fileName, delimiter=',')
+      logging.debug(f'loaded csv file {fileName}')
+      return dict(reader)
+    except IOError as e:
+      logging.error(f'failed to load: {fileName}',e)
 
 def api_auth():
-        """API call for authentification OAUTH"""
-        print("Open the link in a browser and paste the pincode when prompted")
-        print(("https://trakt.tv/oauth/authorize?response_type=code&"
-              "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
-                  os.getenv("TRATK_API_KEY"))))
-        pincode = str(input('Input:'))
-        url = 'https://api.trakt.tv' + '/oauth/token'
-        values = {
-            "code": pincode,
-            "client_id": os.getenv("TRATK_API_KEY"),
-            "client_secret": os.getenv("TRATK_API_SECRET"),
-            "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-            "grant_type": "authorization_code"
-        }
+  """API call for authentification OAUTH"""
+  print("Open the link in a browser and paste the pincode when prompted")
+  print(("https://trakt.tv/oauth/authorize?response_type=code&"
+        "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
+            os.getenv("TRATK_API_KEY"))))
+  pincode = str(input('Input:'))
+  url = 'https://api.trakt.tv' + '/oauth/token'
+  values = {
+      "code": pincode,
+      "client_id": os.getenv("TRATK_API_KEY"),
+      "client_secret": os.getenv("TRATK_API_SECRET"),
+      "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+      "grant_type": "authorization_code"
+  }
 
-        request = requests.post(url, data=values)
-        response = request.json()
-        _headers['Authorization'] = 'Bearer ' + response["access_token"]
-        _headers['trakt-api-key'] = os.getenv("TRATK_API_KEY")
-        print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
+  request = requests.post(url, data=values)
+  response = request.json()
+  _headers['Authorization'] = 'Bearer ' + response["access_token"]
+  _headers['trakt-api-key'] = os.getenv("TRATK_API_KEY")
+  print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
 
 def search():
   """Search movies or tv shows and find it's trakt id"""
@@ -128,12 +136,11 @@ def addDuplicate(item_found,item_to_search,type,type2,watched_at):
     _duplicates[type2][item_to_search] = []
     _duplicates[type2][item_to_search].append(item)
 
-def importValidatedDuplicates():
-  file = 'duplicates.json'
+def importValidatedDuplicates(file):
   try:
     f = open(file,)
     data = json.load(f)
-    print(data)
+
     for movie in data['movies']:
       for item_found in data['movies'][movie]:
         if item_found['validated'] == 'True':
@@ -146,7 +153,7 @@ def importValidatedDuplicates():
             }
             _final_request['movies'].append(m)
   except Exception as e:
-    print(f'no file {file}. ',e)
+    logging.error(f'cannot open file {file}',e)
 
 def main():
   #load from csv
@@ -166,7 +173,7 @@ def main():
   if len(_duplicates['episodes'])>0:
     print('\nFound duplicate episodes check duplicates.json\n')    
 
-  importValidatedDuplicates()
+  importValidatedDuplicates('duplicatesValidated.json')
   print('\n--------------------Final Request--------------------\n')
   print(json.dumps(_final_request))
   
@@ -177,8 +184,15 @@ def main():
     print(json.dumps(_final_request), file=f)
 
   # invoke   
-  response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
-  print(response)
+  file = 'final.json'
+  try:
+    f = open(file,)
+    data = json.load(f)
+    print(data)
+    response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
+    print(response)
+  except:
+    print(Exception)
 
   print('\n------------Exiting Program------------\n')
   sys.exit(0)

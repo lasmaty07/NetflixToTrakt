@@ -38,30 +38,32 @@ csvFile=open(os.getenv("FILE"), newline='')
 class NetflixItems():
   def __init__(self):
     self.duplicates = {"movies": {}, "episodes":{}}
+    self.items = {}
 
-  def read_csv(self,fileName):
+  def load_csv(self,fileName):
     try:
       reader = csv.reader(fileName, delimiter=',')
       logging.debug(f'loaded csv file {fileName}')
-      return dict(reader)
+      self.items =  dict(reader)
     except IOError as e:
       logging.error(f'failed to load: {fileName}',e)
 
 def api_auth():
   """API call for authentification OAUTH"""
-  print("Open the link in a browser and paste the pincode when prompted")
-  print(("https://trakt.tv/oauth/authorize?response_type=code&"
-        "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
-            os.getenv("TRATK_API_KEY"))))
-  pincode = str(input('Input:'))
-  url = 'https://api.trakt.tv' + '/oauth/token'
-  values = {
-      "code": pincode,
-      "client_id": os.getenv("TRATK_API_KEY"),
-      "client_secret": os.getenv("TRATK_API_SECRET"),
-      "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-      "grant_type": "authorization_code"
-  }
+  if not(os.getenv("TOKEN")):  
+    print("Open the link in a browser and paste the pincode when prompted")
+    print(("https://trakt.tv/oauth/authorize?response_type=code&"
+          "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
+              os.getenv("TRATK_API_KEY"))))
+    pincode = str(input('Input:'))
+    url = 'https://api.trakt.tv' + '/oauth/token'
+    values = {
+        "code": pincode,
+        "client_id": os.getenv("TRATK_API_KEY"),
+        "client_secret": os.getenv("TRATK_API_SECRET"),
+        "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+        "grant_type": "authorization_code"
+    }
 
   request = requests.post(url, data=values)
   response = request.json()
@@ -157,15 +159,16 @@ def importValidatedDuplicates(file):
 
 def main():
   #load from csv
-  global _items
-  _items = read_csv(csvFile)
+  #global _items
+  items = NetflixItems()
+  items.read_csv(csvFile)
 
-  if not(os.getenv("TOKEN")):
-    api_auth()
+  
+  api_auth()
 
   print(_headers)
 
-  print('Found ' + str(len(_items)) + ' items to import\n')
+  print('Found ' + str(len(items.items)) + ' items to import\n')
   search()
   if len(_duplicates['movies'])>0:
     print('\nFound duplicate movies check duplicates.json\n')

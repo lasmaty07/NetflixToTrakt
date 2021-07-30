@@ -1,18 +1,18 @@
-# Program to import whatched history into tratk from netflix
+# Program to import watched history into Trakt from Netflix
 
-this is a work in progress.
+This is a work in progress.
 
-- Export csv from netflix (netflix.com -> account -> {Profile} -> Viewing activity -> view -> Download all )
-- remove first line in csv (headers)
-- complete `SECRETS.env` with this values
+- Export csv from Netflix (Netflix.com -> Account -> {Profile} -> Viewing activity -> View -> Download all )
+- Remove first line in csv (headers)
+- Complete `SECRETS.env` with this value
 
 ```
-TRATK_API_KEY={YOUR_TRATK_API_KEY}
+TRAKT_API_KEY={YOUR_TRAKT_API_KEY}
 
 #CLIENT SECRET
-TRATK_API_SECRET={YOUR_TRATK_API_SECRET}
+TRAKT_API_SECRET={YOUR_TRAKT_API_SECRET}
 
-#CSV FILE EXPORTEF FROM NETFLIX
+#CSV FILE EXPORTED FROM NETFLIX
 FILE=change_me/NetflixViewingHistory.csv
 
 TOKEN=

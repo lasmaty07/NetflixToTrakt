@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 import os, sys, json
+from movie import Movie
+from show import Show
 
 try:
     from pathlib import Path
@@ -62,19 +64,22 @@ class NetflixItems:
                 pos1 = item_to_search.find(":")
                 pos2 = item_to_search[item_to_search.find(":") + 2 :].find(":")
                 show_title = item_to_search[:pos1]
-                episode_name = item_to_search[pos1 + pos2 + 2 + 2 :]
+                title = item_to_search[pos1 + pos2 + 2 + 2 :]
 
-                title = episode_name
+                show = Show(show_title, title, self.items[item_to_search])
+
                 response = requests.get(
-                    _baseurl + "/search/episode?query=" + title.replace(" ", "%20"),
+                    _baseurl + "/search/episode?query=" + show.episode_name.replace(" ", "%20"),
                     headers=_headers,
                 )
                 type = "episode"
                 type2 = "episodes"
             else:
                 title = item_to_search
+                movie = Movie(item_to_search, self.items[item_to_search])
+
                 response = requests.get(
-                    _baseurl + "/search/movie?query=" + title.replace(" ", "%20"),
+                    _baseurl + "/search/movie?query=" + movie.title.replace(" ", "%20"),
                     headers=_headers,
                 )
                 type = "movie"
@@ -90,9 +95,7 @@ class NetflixItems:
                         type == "movie" or item_found["show"]["title"] == show_title
                     ):
 
-                        watched_at = datetime.datetime.strptime(
-                            self.items[item_to_search], "%m/%d/%y"
-                        )
+                        watched_at = datetime.datetime.strptime(self.items[item_to_search], "%m/%d/%y")
                         # time un 2020-09-12T00:00:00.000Z
                         m = {
                             "watched_at": watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
@@ -103,14 +106,8 @@ class NetflixItems:
                             },
                         }
 
-                        if (
-                            i != 0
-                            and item_found[type]["title"].lower()
-                            == item_found_prev[type]["title"].lower()
-                        ):
-                            addDuplicate(
-                                item_found, item_to_search, type, type2, watched_at
-                            )
+                        if i != 0 and item_found[type]["title"].lower() == item_found_prev[type]["title"].lower():
+                            addDuplicate(item_found, item_to_search, type, type2, watched_at)
 
                         item_found_prev = item_found
                         i = i + 1
@@ -128,9 +125,7 @@ def api_auth():
         print(
             (
                 "https://trakt.tv/oauth/authorize?response_type=code&"
-                "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
-                    os.getenv("TRATK_API_KEY")
-                )
+                "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(os.getenv("TRATK_API_KEY"))
             )
         )
         pincode = str(input("Input:"))
@@ -147,11 +142,7 @@ def api_auth():
         response = request.json()
         _headers["Authorization"] = "Bearer " + response["access_token"]
         _headers["trakt-api-key"] = os.getenv("TRATK_API_KEY")
-        print(
-            'Save as "oauth_token" in file {0}: {1}'.format(
-                envars, response["access_token"]
-            )
-        )
+        print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
 
 
 def addDuplicate(item_found, item_to_search, type, type2, watched_at):
@@ -160,11 +151,7 @@ def addDuplicate(item_found, item_to_search, type, type2, watched_at):
     item = {
         "title": item_found[type]["title"],
         "year": str(item_found[type]["year"]),
-        "Imdb_id": (
-            item_found[type]["ids"]["imdb"]
-            if item_found[type]["ids"]["imdb"]
-            else "null"
-        ),
+        "Imdb_id": (item_found[type]["ids"]["imdb"] if item_found[type]["ids"]["imdb"] else "null"),
         "trakt": item_found[type]["ids"]["trakt"],
         "URL": " https://trakt.tv/movies/" + str(item_found[type]["ids"]["trakt"]),
         "watched_at": watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),

@@ -68,10 +68,14 @@ class NetflixItems:
 
                 show = Show(show_title, title, self.items[item_to_search])
 
-                response = requests.get(
-                    _baseurl + "/search/episode?query=" + show.episode_name.replace(" ", "%20"),
-                    headers=_headers,
-                )
+                try:
+                    response = requests.get(
+                        _baseurl + "/search/episode?query=" + show.episode_name.replace(" ", "%20"),
+                        headers=_headers,
+                    )
+                except Exception as e:
+                    logging.error("Error in get", e)
+
                 type = "episode"
                 type2 = "episodes"
             else:
@@ -96,7 +100,6 @@ class NetflixItems:
                     ):
 
                         watched_at = datetime.datetime.strptime(self.items[item_to_search], "%m/%d/%y")
-                        # time un 2020-09-12T00:00:00.000Z
                         m = {
                             "watched_at": watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
                             "title": item_found[type]["title"],

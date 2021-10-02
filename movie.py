@@ -1,9 +1,8 @@
 import datetime
 
+from item import Item
 
-class Movie:
-    def __init__(self, title, time) -> None:
-        self.title = title
-        self.watched_at = datetime.datetime.strptime(time, "%m/%d/%y")
-        self.type = "movie"
-        self.type2 = "movies"
+
+class Movie(Item):
+    type = "movie"
+    type2 = "movies"

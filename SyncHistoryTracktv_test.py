@@ -1,6 +1,5 @@
 import unittest
 
-import SyncHistoryTracktv as sh
 from movie import Movie
 from show import Show
 

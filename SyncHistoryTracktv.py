@@ -7,7 +7,7 @@ try:
   import logging,requests, datetime, csv,json
   from dotenv import load_dotenv
 except:
-  sys.exit("Please use your favorite mehtod to install the following module requests and simplejson to use this script")
+  sys.exit("please run: pip install -r requirements.txt")
 
 
 basepath = Path()
@@ -16,7 +16,7 @@ envars = basepath.cwd() / 'SECRETS.env'
 load_dotenv(envars)
 
 LOG_FILENAME = 'SyncHistoryTracktv.log'
-LOG_LEVEL=logging.INFO
+LOG_LEVEL=logging.DEBUG
 
 logging.basicConfig(filename=LOG_FILENAME,level=LOG_LEVEL)
 
@@ -43,13 +43,16 @@ class NetflixItems():
   def load_csv(self,fileName):
     try:
       reader = csv.reader(fileName, delimiter=',')
+      next(reader) #ignore header
       logging.debug(f'loaded csv file {fileName}')
       self.items =  dict(reader)
     except IOError as e:
       logging.error(f'failed to load: {fileName}',e)
 
   def search_items(self):
-    """Search movies or tv shows and find it's trakt id"""
+    """
+    Search movies or tv shows and find it's trakt id
+    """
     global _final_request
     m = {}
     for item_to_search in self.items:
@@ -98,7 +101,9 @@ class NetflixItems():
             _final_request[type2].append(m)      
 
 def api_auth():
-  """API call for authentification OAUTH"""
+  """
+  API call for authentification OAUTH
+  """
   if not(os.getenv("TOKEN")):  
     print("Open the link in a browser and paste the pincode when prompted")
     print(("https://trakt.tv/oauth/authorize?response_type=code&"
@@ -114,11 +119,11 @@ def api_auth():
         "grant_type": "authorization_code"
     }
 
-  request = requests.post(url, data=values)
-  response = request.json()
-  _headers['Authorization'] = 'Bearer ' + response["access_token"]
-  _headers['trakt-api-key'] = os.getenv("TRATK_API_KEY")
-  print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
+    request = requests.post(url, data=values)
+    response = request.json()
+    _headers['Authorization'] = 'Bearer ' + response["access_token"]
+    _headers['trakt-api-key'] = os.getenv("TRATK_API_KEY")
+    print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
 
 def addDuplicate(item_found,item_to_search,type,type2,watched_at):
   global _duplicates
@@ -160,7 +165,7 @@ def importValidatedDuplicates(file):
 def main():
 
   items = NetflixItems()
-  items.read_csv(csvFile)
+  items.load_csv(csvFile)
   
   api_auth()
 
@@ -174,7 +179,7 @@ def main():
   if len(_duplicates['episodes'])>0:
     print('\nFound duplicate episodes check duplicates.json\n')    
 
-  importValidatedDuplicates('duplicatesValidated.json')
+  #importValidatedDuplicates('duplicatesValidated.json')
   
   print('\n--------------------Final Request--------------------\n')
   print(json.dumps(_final_request))
@@ -191,8 +196,8 @@ def main():
     f = open(file,)
     data = json.load(f)
     print(data)
-    response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
-    print(response)
+    #response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
+    #print(response)
   except:
     print(Exception)
 

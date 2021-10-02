@@ -66,57 +66,57 @@ class NetflixItems:
                 show_title = item_to_search[:pos1]
                 title = item_to_search[pos1 + pos2 + 2 + 2 :]
 
-                show = Show(show_title, title, self.items[item_to_search])
+                item_watched = Show(show_title, title, self.items[item_to_search])
 
                 try:
                     response = requests.get(
-                        _baseurl + "/search/episode?query=" + show.episode_name.replace(" ", "%20"),
+                        _baseurl + "/search/" + item_watched.type + "?query=" + item_watched.episode_name.replace(" ", "%20"),
                         headers=_headers,
                     )
                 except Exception as e:
                     logging.error("Error in get", e)
 
-                type = "episode"
-                type2 = "episodes"
             else:
                 title = item_to_search
-                movie = Movie(item_to_search, self.items[item_to_search])
+                item_watched = Movie(item_to_search, self.items[item_to_search])
 
                 response = requests.get(
-                    _baseurl + "/search/movie?query=" + movie.title.replace(" ", "%20"),
+                    _baseurl + "/search/" + item_watched.type + "?query=" + item_watched.title.replace(" ", "%20"),
                     headers=_headers,
                 )
-                type = "movie"
-                type2 = "movies"
 
             if response:
                 json_data = json.loads(response.text)
                 i = 0
-                item_found_prev = {type: {}}
+                item_found_prev = {item_watched.type: {}}
                 for item_found in json_data:
 
-                    if item_found[type]["title"].lower() == title.lower() and (
-                        type == "movie" or item_found["show"]["title"] == show_title
+                    if item_found[item_watched.type]["title"].lower() == title.lower() and (
+                        item_watched.type == "movie" or item_found["show"]["title"] == show_title
                     ):
 
                         watched_at = datetime.datetime.strptime(self.items[item_to_search], "%m/%d/%y")
                         m = {
                             "watched_at": watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-                            "title": item_found[type]["title"],
+                            "title": item_found[item_watched.type]["title"],
                             "ids": {
-                                "trakt": item_found[type]["ids"]["trakt"],
-                                "imdb": item_found[type]["ids"]["imdb"],
+                                "trakt": item_found[item_watched.type]["ids"]["trakt"],
+                                "imdb": item_found[item_watched.type]["ids"]["imdb"],
                             },
                         }
 
-                        if i != 0 and item_found[type]["title"].lower() == item_found_prev[type]["title"].lower():
-                            addDuplicate(item_found, item_to_search, type, type2, watched_at)
+                        if (
+                            i != 0
+                            and item_found[item_watched.type]["title"].lower()
+                            == item_found_prev[item_watched.type]["title"].lower()
+                        ):
+                            addDuplicate(item_found, item_to_search, item_watched.type, item_watched.type2, watched_at)
 
                         item_found_prev = item_found
                         i = i + 1
                 else:
                     if m != {} and i == 1:
-                        _final_request[type2].append(m)
+                        _final_request[item_watched.type2].append(m)
 
 
 def api_auth():

@@ -9,5 +9,5 @@ class Show(Item):
 
     def __init__(self, show_name, episode_name, time) -> None:
         self.show_name = show_name
-        self.episode_name = episode_name
+        self.title = episode_name
         self.watched_at = datetime.datetime.strptime(time, "%m/%d/%y")

@@ -36,7 +36,7 @@ class TestMovie(unittest.TestCase):
         episode_name = "This is a show name"
         time = "6/28/21"
         show = Show(show_name, episode_name, time)
-        self.assertEqual(show.episode_name, episode_name, f"this should be {episode_name}")
+        self.assertEqual(show.title, episode_name, f"this should be {episode_name}")
         self.assertEqual(show.show_name, show_name, f"this should be {show_name}")
         self.assertEqual(show.type, "episode", "this should be Episode")
         self.assertEqual(show.type2, "episodes", "this should be Episodes")

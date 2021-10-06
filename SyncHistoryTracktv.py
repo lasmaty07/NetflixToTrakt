@@ -26,7 +26,7 @@ _duplicates = {"movies": {}, "episodes": {}}
 csvFile = open(os.getenv("FILE"), newline="")
 
 
-def api_auth():
+def api_auth(item):
     """
     API call for authentification OAUTH
     """
@@ -50,8 +50,8 @@ def api_auth():
 
         request = requests.post(url, data=values)
         response = request.json()
-        _headers["Authorization"] = "Bearer " + response["access_token"]
-        _headers["trakt-api-key"] = os.getenv("TRATK_API_KEY")
+        item._headers["Authorization"] = "Bearer " + response["access_token"]
+        item._headers["trakt-api-key"] = os.getenv("TRATK_API_KEY")
         print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
 
 
@@ -83,7 +83,7 @@ def main():
     items = NetflixItems()
     items.load_csv(csvFile)
 
-    api_auth()
+    api_auth(items)
 
     print("Found " + str(len(items.items)) + " items to import\n")
 

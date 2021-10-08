@@ -97,9 +97,7 @@ class NetflixItems:
                             and item_found[item_watched.type]["title"].lower()
                             == item_found_prev[item_watched.type]["title"].lower()
                         ):
-                            self.addDuplicate(
-                                item_found, item_to_search, item_watched.type, item_watched.type2, item_watched.watched_at
-                            )
+                            self.addDuplicate(item_found, title, item_watched.type, item_watched.type2, item_watched.watched_at)
 
                         item_found_prev = item_found
                         i = i + 1
@@ -107,7 +105,7 @@ class NetflixItems:
                     if m != {} and i == 1:
                         self._final_request[item_watched.type2].append(m)
 
-    def addDuplicate(self, item_found, item_to_search, type, type2, watched_at):
+    def addDuplicate(self, item_found, title, type, type2, watched_at):
         global _duplicates
 
         item = {
@@ -120,8 +118,8 @@ class NetflixItems:
             "validated": "False",
         }
 
-        if item_to_search in self._duplicates[type2]:
-            self._duplicates[type2][item_to_search].append(item)
+        if title in self._duplicates[type2]:
+            self._duplicates[type2][title].append(item)
         else:
-            self._duplicates[type2][item_to_search] = []
-            self._duplicates[type2][item_to_search].append(item)
+            self._duplicates[type2][title] = []
+            self._duplicates[type2][title].append(item)

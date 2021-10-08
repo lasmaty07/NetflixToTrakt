@@ -26,7 +26,7 @@ _duplicates = {"movies": {}, "episodes": {}}
 csvFile = open(os.getenv("FILE"), newline="")
 
 
-def api_auth(item):
+def api_auth(items):
     """
     API call for authentification OAUTH
     """
@@ -50,8 +50,8 @@ def api_auth(item):
 
         request = requests.post(url, data=values)
         response = request.json()
-        item._headers["Authorization"] = "Bearer " + response["access_token"]
-        item._headers["trakt-api-key"] = os.getenv("TRATK_API_KEY")
+        items._headers["Authorization"] = "Bearer " + response["access_token"]
+        items._headers["trakt-api-key"] = os.getenv("TRATK_API_KEY")
         print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
 
 

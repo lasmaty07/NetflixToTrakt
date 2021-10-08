@@ -34,13 +34,12 @@ class NetflixItems:
         self.items = {}
 
     def load_csv(self, fileName):
-        try:
-            reader = csv.reader(fileName, delimiter=",")
+
+        with open(fileName) as f:
+            reader = csv.reader(f, delimiter=",")
             next(reader)  # ignore header
             logging.debug(f"loaded csv file {fileName}")
             self.items = dict(reader)
-        except IOError as e:
-            logging.error(f"failed to load: {fileName}", e)
 
     def isSeries(self, text) -> bool:
         return text.find(":") > 0
@@ -97,7 +96,7 @@ class NetflixItems:
                             and item_found[item_watched.type]["title"].lower()
                             == item_found_prev[item_watched.type]["title"].lower()
                         ):
-                            self.addDuplicate(item_found, title, item_watched.type, item_watched.type2, item_watched.watched_at)
+                            self.addDuplicate(item_found, title, item_watched)
 
                         item_found_prev = item_found
                         i = i + 1
@@ -105,21 +104,21 @@ class NetflixItems:
                     if m != {} and i == 1:
                         self._final_request[item_watched.type2].append(m)
 
-    def addDuplicate(self, item_found, title, type, type2, watched_at):
+    def addDuplicate(self, item_found, title, item_watched):
         global _duplicates
 
         item = {
-            "title": item_found[type]["title"],
-            "year": str(item_found[type]["year"]),
-            "Imdb_id": (item_found[type]["ids"]["imdb"] if item_found[type]["ids"]["imdb"] else "null"),
-            "trakt": item_found[type]["ids"]["trakt"],
-            "URL": " https://trakt.tv/movies/" + str(item_found[type]["ids"]["trakt"]),
-            "watched_at": watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+            "title": item_found[item_watched.type]["title"],
+            "year": str(item_found[item_watched.type]["year"]),
+            "Imdb_id": (item_found[item_watched.type]["ids"]["imdb"] if item_found[item_watched.type]["ids"]["imdb"] else "null"),
+            "trakt": item_found[item_watched.type]["ids"]["trakt"],
+            "URL": " https://trakt.tv/movies/" + str(item_found[item_watched.type]["ids"]["trakt"]),
+            "watched_at": item_watched.watched_at.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
             "validated": "False",
         }
 
-        if title in self._duplicates[type2]:
-            self._duplicates[type2][title].append(item)
+        if title in self._duplicates[item_watched.type2]:
+            self._duplicates[item_watched.type2][title].append(item)
         else:
-            self._duplicates[type2][title] = []
-            self._duplicates[type2][title].append(item)
+            self._duplicates[item_watched.type2][title] = []
+            self._duplicates[item_watched.type2][title].append(item)

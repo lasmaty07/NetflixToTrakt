@@ -23,7 +23,7 @@ logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL)
 
 _final_request = {"movies": [], "episodes": []}
 _duplicates = {"movies": {}, "episodes": {}}
-csvFile = open(os.getenv("FILE"), newline="")
+csvFile = os.getenv("FILE")
 
 
 def api_auth(items):
@@ -95,7 +95,7 @@ def main():
     if len(_duplicates["episodes"]) > 0:
         print("\nFound duplicate episodes check duplicates.json\n")
 
-    # importValidatedDuplicates('duplicatesValidated.json')
+    importValidatedDuplicates("duplicatesValidated.json")
 
     print("\n--------------------Final Request--------------------\n")
     print(json.dumps(items._final_request))

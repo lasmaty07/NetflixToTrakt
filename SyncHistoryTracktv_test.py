@@ -57,14 +57,14 @@ class TestShow(unittest.TestCase):
 class TestItems(unittest.TestCase):
     def testItems(self):
         items = NetflixItems()
-        items.load_csv(open("NetflixViewingHistory_test.csv", newline=""))
+        items.load_csv("NetflixViewingHistory_test.csv")
         self.assertEqual(len(items.items), 5, "this should be 5")
         self.assertTrue(items.isSeries("Brooklyn Nine-Nine: Season 6: Casecation"))
 
     def testDuplicateMovies(self):
         items = NetflixItems()
         item_watched = Movie("The Nice Guys", "12/13/17")
-        items.load_csv(open("NetflixViewingHistory_test.csv", newline=""))
+        items.load_csv("NetflixViewingHistory_test.csv")
 
         item_found = {
             "type": "movie",
@@ -95,7 +95,7 @@ class TestItems(unittest.TestCase):
             },
         }
 
-        items.addDuplicate(item_found, title, item_watched.type, item_watched.type2, item_watched.watched_at)
+        items.addDuplicate(item_found, title, item_watched)
         self.assertEqual(items._duplicates, duplicates, "duplicates not equal")
 
     @unittest.skip("no shows duplicated so far")
@@ -141,6 +141,37 @@ class TestItems(unittest.TestCase):
 
         items.addDuplicate(item_found, title, item_watched.type, item_watched.type2, item_watched.watched_at)
         self.assertEqual(items._duplicates, duplicates, "duplicates not equal")
+
+    def testFinalRequest(self):
+        items = NetflixItems()
+        items.load_csv("NetflixViewingHistory_test.csv")
+        items.search_items()
+
+        final_request = {
+            "movies": [
+                {
+                    "watched_at": "2017-12-13T00:00:00.000Z",
+                    "title": "The Nice Guys",
+                    "ids": {"trakt": 187173, "imdb": "tt3799694"},
+                },
+                {
+                    "watched_at": "2021-05-05T00:00:00.000Z",
+                    "title": "The Mitchells vs. the Machines",
+                    "ids": {"trakt": 349011, "imdb": "tt7979580"},
+                },
+            ],
+            "episodes": [
+                {"watched_at": "2021-06-28T00:00:00.000Z", "title": "Casecation", "ids": {"trakt": 3399236, "imdb": "tt8408792"}},
+                {
+                    "watched_at": "2021-06-27T00:00:00.000Z",
+                    "title": "The Therapist",
+                    "ids": {"trakt": 3399235, "imdb": "tt8408790"},
+                },
+                {"watched_at": "2021-06-27T00:00:00.000Z", "title": "Gintars", "ids": {"trakt": 3383873, "imdb": "tt8408784"}},
+            ],
+        }
+
+        self.assertEqual(items._final_request, final_request, "this should be equal")
 
 
 if __name__ == "__main__":

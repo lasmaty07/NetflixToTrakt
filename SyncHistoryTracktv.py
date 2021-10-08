@@ -114,8 +114,8 @@ def main():
         )
         data = json.load(f)
         print(data)
-        # response =requests.post( _baseurl + '/sync/history',data=json.dumps(_final_request), headers=_headers)
-        # print(response)
+        response = requests.post(items._baseurl + "/sync/history", data=json.dumps(_final_request), headers=items._headers)
+        print(response)
     except:
         print(Exception)
 

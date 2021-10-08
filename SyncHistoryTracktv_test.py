@@ -1,8 +1,11 @@
+import json
+import os
 import unittest
 
 from movie import Movie
 from show import Show
 from netflix_items import NetflixItems
+from SyncHistoryTracktv import importValidatedDuplicates
 
 
 class TestSum(unittest.TestCase):
@@ -172,6 +175,53 @@ class TestItems(unittest.TestCase):
         }
 
         self.assertEqual(items._final_request, final_request, "this should be equal")
+
+
+class TestValidatedDuplicates(unittest.TestCase):
+    def testDuplicatedFile(self):
+        items = NetflixItems()
+
+        _duplicates = {
+            "movies": {
+                "Total Recall": [
+                    {
+                        "title": "Total Recall",
+                        "year": "1990",
+                        "Imdb_id": "tt0100802",
+                        "trakt": 704,
+                        "URL": " https://trakt.tv/movies/704",
+                        "watched_at": "2021-05-05T00:00:00.000Z",
+                        "validated": "True",
+                    },
+                    {
+                        "title": "Total Recall",
+                        "year": "None",
+                        "Imdb_id": "tt5847226",
+                        "trakt": 254392,
+                        "URL": " https://trakt.tv/movies/254391",
+                        "watched_at": "2021-05-05T00:00:00.000Z",
+                        "validated": "False",
+                    },
+                ]
+            },
+            "episodes": {},
+        }
+
+        finalRequest = {
+            "movies": [
+                {"watched_at": "2021-05-05T00:00:00.000Z", "title": "Total Recall", "ids": {"trakt": 704, "imdb": "tt0100802"}},
+            ],
+            "episodes": [],
+        }
+
+        with open("duplicatesValidated_test.json", "w") as f:
+            print(json.dumps(_duplicates), file=f)
+
+        validatedDuplicates = importValidatedDuplicates("duplicatesValidated_test.json")
+        items.appendValidDuplicates(validatedDuplicates)
+        os.remove("duplicatesValidated_test.json")
+
+        self.assertEqual(items._final_request, finalRequest, "this should be equal")
 
 
 if __name__ == "__main__":

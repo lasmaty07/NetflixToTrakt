@@ -56,12 +56,14 @@ def api_auth(items):
 
 
 def importValidatedDuplicates(file):
+    validatedDuplicates = []
+
     try:
         f = open(
             file,
         )
-        data = json.load(f)
 
+        data = json.load(f)
         for movie in data["movies"]:
             for item_found in data["movies"][movie]:
                 if item_found["validated"] == "True":
@@ -73,9 +75,11 @@ def importValidatedDuplicates(file):
                             "imdb": item_found["Imdb_id"],
                         },
                     }
-                    _final_request["movies"].append(m)
+                    validatedDuplicates.append(m)
     except Exception as e:
         logging.error(f"cannot open file {file}", e)
+
+    return validatedDuplicates
 
 
 def main():
@@ -95,7 +99,9 @@ def main():
     if len(_duplicates["episodes"]) > 0:
         print("\nFound duplicate episodes check duplicates.json\n")
 
-    importValidatedDuplicates("duplicatesValidated.json")
+    validatedDuplicates = importValidatedDuplicates("duplicates.json")
+
+    items.appendValidDuplicates(validatedDuplicates)
 
     print("\n--------------------Final Request--------------------\n")
     print(json.dumps(items._final_request))
@@ -114,8 +120,8 @@ def main():
         )
         data = json.load(f)
         print(data)
-        response = requests.post(items._baseurl + "/sync/history", data=json.dumps(_final_request), headers=items._headers)
-        print(response)
+        # response = requests.post(items._baseurl + "/sync/history", data=json.dumps(_final_request), headers=items._headers)
+        # print(response)
     except:
         print(Exception)
 

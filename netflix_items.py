@@ -99,7 +99,7 @@ class NetflixItems:
                             self.addDuplicate(item_found, title, item_watched)
 
                         item_found_prev = item_found
-                        i = i + 1
+                        i += 1
                 else:
                     if m != {} and i == 1:
                         self._final_request[item_watched.type2].append(m)
@@ -122,3 +122,8 @@ class NetflixItems:
         else:
             self._duplicates[item_watched.type2][title] = []
             self._duplicates[item_watched.type2][title].append(item)
+
+    def appendValidDuplicates(self, validatedDuplicates):
+
+        for duplicate in validatedDuplicates:
+            self._final_request["movies"].append(duplicate)

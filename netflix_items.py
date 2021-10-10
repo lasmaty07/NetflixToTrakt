@@ -44,7 +44,7 @@ class NetflixItems:
     def isSeries(self, text) -> bool:
         return text.find(":") > 0
 
-    def search_items(self):
+    def search_items_create_request(self):
         """
         Search movies or tv shows and find it's trakt id
         """

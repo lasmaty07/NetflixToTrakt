@@ -61,7 +61,7 @@ class TestItems(unittest.TestCase):
     def testItems(self):
         items = NetflixItems()
         items.load_csv("NetflixViewingHistory_test.csv")
-        self.assertEqual(len(items.items), 5, "this should be 5")
+        self.assertEqual(len(items.items), 6, "this should be 6")
         self.assertTrue(items.isSeries("Brooklyn Nine-Nine: Season 6: Casecation"))
 
     def testDuplicateMovies(self):
@@ -148,7 +148,7 @@ class TestItems(unittest.TestCase):
     def testFinalRequest(self):
         items = NetflixItems()
         items.load_csv("NetflixViewingHistory_test.csv")
-        items.search_items()
+        items.search_items_create_request()
 
         final_request = {
             "movies": [

@@ -91,7 +91,7 @@ def main():
 
     print("Found " + str(len(items.items)) + " items to import\n")
 
-    items.search_items()
+    items.search_items_create_request()
 
     if len(_duplicates["movies"]) > 0:
         print("\nFound duplicate movies check duplicates.json\n")
@@ -120,8 +120,8 @@ def main():
         )
         data = json.load(f)
         print(data)
-        # response = requests.post(items._baseurl + "/sync/history", data=json.dumps(_final_request), headers=items._headers)
-        # print(response)
+        response = requests.post(items._baseurl + "/sync/history", data=json.dumps(_final_request), headers=items._headers)
+        print(response)
     except:
         print(Exception)
 

@@ -23,10 +23,10 @@ class NetflixItems:
     _headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "User-Agent": "Tratk importer",
+        "User-Agent": "Trakt importer",
         "Connection": "Keep-Alive",
         "trakt-api-version": "2",
-        "trakt-api-key": os.getenv("TRATK_API_KEY"),
+        "trakt-api-key": os.getenv("TRAKT_API_KEY"),
         "Authorization": "Bearer " + os.getenv("TOKEN"),
     }
 

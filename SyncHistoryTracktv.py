@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
-import os, sys, json, logging, requests
+import os, sys, json, logging
 from pathlib import Path
 from netflix_items import NetflixItems
 
 try:
     from dotenv import load_dotenv
-except:
+    import requests
+except ModuleNotFoundError:
     sys.exit("please run: pip install -r requirements.txt")
 
 

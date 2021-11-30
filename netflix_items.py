@@ -1,11 +1,12 @@
-import requests, os, logging, requests, csv, json, sys
+import os, logging, csv, json, sys
 from pathlib import Path
 from movie import Movie
 from show import Show
 
 try:
     from dotenv import load_dotenv
-except:
+    import requests
+except ModuleNotFoundError:
     sys.exit("please run: pip install -r requirements.txt")
 
 basepath = Path()

@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
-import os, sys, json, logging, requests
+import os, sys, json, logging
 from pathlib import Path
 from netflix_items import NetflixItems
 
 try:
     from dotenv import load_dotenv
-except:
+    import requests
+except ModuleNotFoundError:
     sys.exit("please run: pip install -r requirements.txt")
 
 
@@ -35,15 +36,15 @@ def api_auth(items):
         print(
             (
                 "https://trakt.tv/oauth/authorize?response_type=code&"
-                "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(os.getenv("TRATK_API_KEY"))
+                "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(os.getenv("TRAKT_API_KEY"))
             )
         )
         pincode = str(input("Input:"))
         url = "https://api.trakt.tv" + "/oauth/token"
         values = {
             "code": pincode,
-            "client_id": os.getenv("TRATK_API_KEY"),
-            "client_secret": os.getenv("TRATK_API_SECRET"),
+            "client_id": os.getenv("TRAKT_API_KEY"),
+            "client_secret": os.getenv("TRAKT_API_SECRET"),
             "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
             "grant_type": "authorization_code",
         }
@@ -51,8 +52,8 @@ def api_auth(items):
         request = requests.post(url, data=values)
         response = request.json()
         items._headers["Authorization"] = "Bearer " + response["access_token"]
-        items._headers["trakt-api-key"] = os.getenv("TRATK_API_KEY")
-        print('Save as "oauth_token" in file {0}: {1}'.format(envars, response["access_token"]))
+        items._headers["trakt-api-key"] = os.getenv("TRAKT_API_KEY")
+        print('Save as "TOKEN" in file {0}: {1}'.format(envars, response["access_token"]))
 
 
 def importValidatedDuplicates(file):
